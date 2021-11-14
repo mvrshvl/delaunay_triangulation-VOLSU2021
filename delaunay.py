@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 
 class Delaunay2d:
-    EPS = 1.23456789e-14
+    epsilone = 1.23456789e-14
 
     def __init__(self, points):
         self.points = points[:]
@@ -33,7 +33,7 @@ class Delaunay2d:
         stop = False
         while not stop and index + 2 < len(points):
             area = self.getArea(index, index + 1, index + 2)
-            if abs(area) < self.EPS:
+            if abs(area) < self.epsilone:
                 del self.points[index]
             else:
                 stop = True
@@ -101,13 +101,13 @@ class Delaunay2d:
 
     def isEdgeVisible(self, ip, edge):
         area = self.getArea(ip, edge[0], edge[1])
-        if area < self.EPS:
+        if area < self.epsilone:
             return True
         return False
 
     def makeCounterClockwise(self, ips): # Изменение порядка узлов
         area = self.getArea(ips[0], ips[1], ips[2])
-        if area < -self.EPS:
+        if area < -self.epsilone:
             ip1, ip2 = ips[1], ips[2]
             ips[1], ips[2] = ip2, ip1
 
@@ -141,7 +141,7 @@ class Delaunay2d:
         angle1 = abs(math.atan2(crossProd1, dotProd1))
         angle2 = abs(math.atan2(crossProd2, dotProd2))
 
-        if angle1 + angle2 > math.pi * (1.0 + self.EPS):
+        if angle1 + angle2 > math.pi * (1.0 + self.epsilone):
             newTri1 = [iOpposite1, edge[0], iOpposite2]  # triangle a
             newTri2 = [iOpposite1, iOpposite2, edge[1]]  # triangle b
 
