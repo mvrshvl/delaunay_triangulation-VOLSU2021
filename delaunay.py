@@ -4,13 +4,13 @@ import copy
 import matplotlib.pyplot as plt
 
 
-class Delaunay2d:
+class Delaunay:
     epsilone = 1.23456789e-14
 
     def __init__(self, points):
         self.points = points[:]
         self.triangles = []
-        self.edge2Triangles = {}
+        self.edge = {}
         self.boundaryEdges = set()
         self.appliedBoundaryEdges = None
         self.holes = None
@@ -50,13 +50,13 @@ class Delaunay2d:
             self.boundaryEdges.add(e20)
 
             e01 = self.makeKey(e01[0], e01[1])
-            self.edge2Triangles[e01] = [0, ]
+            self.edge[e01] = [0, ]
 
             e12 = self.makeKey(e12[0], e12[1])
-            self.edge2Triangles[e12] = [0, ]
+            self.edge[e12] = [0, ]
 
             e20 = self.makeKey(e20[0], e20[1])
-            self.edge2Triangles[e20] = [0, ]
+            self.edge[e20] = [0, ]
 
         else:
             return
@@ -74,7 +74,7 @@ class Delaunay2d:
         w = width - 2 * padding
         h = height - 2 * padding
 
-        for e in self.edge2Triangles:
+        for e in self.edge:
             i1, i2 = e
             xp1 = padding + int(w * (self.points[i1][0] - xmin) / (xmax - xmin))
             yp1 = padding + int(h * (ymax - self.points[i1][1]) / (ymax - ymin))
@@ -92,7 +92,7 @@ class Delaunay2d:
         return self.triangles
 
     def getEdges(self):
-        return self.edge2Triangles.keys()
+        return self.edge.keys()
 
     def getArea(self, ip0, ip1, ip2):
         d1 = self.points[ip1] - self.points[ip0]
@@ -114,7 +114,7 @@ class Delaunay2d:
     def flipOneEdge(self, edge):
         res = set()
 
-        tris = self.edge2Triangles.get(edge, [])
+        tris = self.edge.get(edge, [])
         if len(tris) < 2:
             return res
 
@@ -148,20 +148,20 @@ class Delaunay2d:
             self.triangles[iTri1] = newTri1
             self.triangles[iTri2] = newTri2
 
-            del self.edge2Triangles[edge]
+            del self.edge[edge]
 
             e = self.makeKey(iOpposite1, iOpposite2)
-            self.edge2Triangles[e] = [iTri1, iTri2]
+            self.edge[e] = [iTri1, iTri2]
 
             e = self.makeKey(iOpposite1, edge[1])
-            v = self.edge2Triangles[e]
+            v = self.edge[e]
             for i in range(len(v)):
                 if v[i] == iTri1:
                     v[i] = iTri2
             res.add(e)
 
             e = self.makeKey(iOpposite2, edge[0])
-            v = self.edge2Triangles[e]
+            v = self.edge[e]
             for i in range(len(v)):
                 if v[i] == iTri2:
                     v[i] = iTri1
@@ -173,7 +173,7 @@ class Delaunay2d:
         return res
 
     def flipEdges(self):
-        edgeSet = set(self.edge2Triangles.keys())
+        edgeSet = set(self.edge.keys())
 
         continueFlipping = True
 
@@ -200,7 +200,7 @@ class Delaunay2d:
                 e = list(edge[:])
                 e.sort()
                 iTri = len(self.triangles) - 1
-                self.edge2Triangles[tuple(e)].append(iTri)
+                self.edge[tuple(e)].append(iTri)
 
                 e1 = [ip, edge[0]]
                 e1.sort()
@@ -208,12 +208,12 @@ class Delaunay2d:
                 e2 = [edge[1], ip]
                 e2.sort()
                 e2 = tuple(e2)
-                v1 = self.edge2Triangles.get(e1, [])
+                v1 = self.edge.get(e1, [])
                 v1.append(iTri)
-                v2 = self.edge2Triangles.get(e2, [])
+                v2 = self.edge.get(e2, [])
                 v2.append(iTri)
-                self.edge2Triangles[e1] = v1
-                self.edge2Triangles[e2] = v2
+                self.edge[e1] = v1
+                self.edge[e2] = v2
 
                 boundaryEdgesToRemove.add(edge)
                 boundaryEdgesToAdd.add((edge[0], ip))
@@ -225,7 +225,7 @@ class Delaunay2d:
             bEdgeSorted = list(bedge)
             bEdgeSorted.sort()
             bEdgeSorted = tuple(bEdgeSorted)
-            if len(self.edge2Triangles[bEdgeSorted]) == 1:
+            if len(self.edge[bEdgeSorted]) == 1:
                 self.boundaryEdges.add(bedge)
 
         flipped = True
